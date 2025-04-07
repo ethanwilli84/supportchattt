@@ -10,9 +10,10 @@ import os
 # Access OpenAI API Key from Streamlit secrets
 try:
     OPENAI_API_KEY = st.secrets["openai_api_key"]["api_key"]
-    st.write("Successfully loaded API Key from secrets.")  # Debugging message
-except KeyError:
-    st.error("API Key not found in Streamlit secrets. Please check your secrets.toml file.")
+    st.write("Successfully loaded API Key from secrets.")  # Debugging
+except KeyError as e:
+    st.error(f"API Key not found in Streamlit secrets. Please check your secrets configuration.")
+    raise e
 
 # Load or create FAISS index
 INDEX_FOLDER = "faiss_index"
@@ -20,7 +21,6 @@ support_file = "support_chats.txt"
 
 embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 
-# If vectorstore exists, load it. Otherwise, create from support_chats.txt.
 if os.path.exists(INDEX_FOLDER):
     print("Loading existing FAISS vectorstore...")
     vectorstore = FAISS.load_local(INDEX_FOLDER, embeddings, allow_dangerous_deserialization=True)
