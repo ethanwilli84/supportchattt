@@ -7,31 +7,28 @@ from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 
-# Debugging: check the structure of st.secrets
-st.write("Streamlit Secrets: ", st.secrets)
+# Debugging: Check Streamlit secrets structure
+st.write(st.secrets)  # This will help us understand how the secrets are structured
 
 # Access OpenAI API Key from Streamlit secrets
 try:
-    # If the structure is correct, this should work
+    # Ensure we're accessing the secret properly
     OPENAI_API_KEY = st.secrets["openai_api_key"]["api_key"]
-    st.write("Successfully loaded API Key from secrets.")  # Debugging line (remove after success)
-except KeyError as e:
-    st.error(f"API Key not found in Streamlit secrets. Please check your secrets.toml. Error: {e}")
-    raise ValueError("API Key not found in Streamlit secrets.")
+    st.write("Successfully loaded API Key from secrets.")  # Debugging
+except KeyError:
+    st.error("API Key not found in Streamlit secrets. Please check your secrets configuration.")
 
 # Load or create FAISS index
 INDEX_FOLDER = "faiss_index"
 support_file = "support_chats.txt"
 
-# Initialize embeddings with OpenAI API Key
 embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 
-# Load or create vectorstore
 if os.path.exists(INDEX_FOLDER):
-    st.write("Loading existing FAISS vectorstore...")
+    print("Loading existing FAISS vectorstore...")
     vectorstore = FAISS.load_local(INDEX_FOLDER, embeddings, allow_dangerous_deserialization=True)
 else:
-    st.write("Vectorstore not found. Creating from support_chats.txt...")
+    print("Vectorstore not found. Creating from support_chats.txt...")
     loader = TextLoader(support_file)
     documents = loader.load()
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
@@ -51,7 +48,6 @@ Support History:
 Customer: {question}
 Support:"""
 
-# Set up prompt template and QA chain
 prompt = PromptTemplate(
     input_variables=["question", "context"],
     template=custom_prompt,
@@ -64,21 +60,18 @@ qa_chain = RetrievalQA.from_chain_type(
     chain_type_kwargs={"prompt": prompt},
 )
 
-# Streamlit UI configuration
+# Streamlit UI
 st.set_page_config(page_title="Sire Support Chat", layout="centered")
 st.markdown("<h1 style='text-align: center;'>💬 Sire Support Chat</h1>", unsafe_allow_html=True)
 
-# Manage chat history in session state
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# Display previous chat history
 with st.container():
     for entry in st.session_state.chat_history:
         st.markdown(f"<div style='padding: 10px; background-color: #222; color: #fff; border-radius: 8px; margin-bottom: 10px;'><b>You:</b> {entry['user']}</div>", unsafe_allow_html=True)
         st.markdown(f"<div style='padding: 10px; background-color: #333; color: #e0e0e0; border-radius: 8px; margin-bottom: 20px;'><b>Bot:</b> {entry['bot']}</div>", unsafe_allow_html=True)
 
-# Input and button to send new message
 user_input = st.text_input("Type your message...", key="input", label_visibility="collapsed")
 
 if st.button("Send"):
