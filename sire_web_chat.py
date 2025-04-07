@@ -8,7 +8,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 
 # Your OpenAI key
-OPENAI_API_KEY = "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"
+import streamlit as st
+OPENAI_API_KEY = st.secrets["openai_api_key"]
 
 # Load or create FAISS index
 INDEX_FOLDER = "faiss_index"
