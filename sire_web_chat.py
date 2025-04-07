@@ -7,16 +7,12 @@ from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 
-# Debugging: Check Streamlit secrets structure
-st.write(st.secrets)  # This will help us understand how the secrets are structured
-
 # Access OpenAI API Key from Streamlit secrets
 try:
-    # Ensure we're accessing the secret properly
     OPENAI_API_KEY = st.secrets["openai_api_key"]["api_key"]
-    st.write("Successfully loaded API Key from secrets.")  # Debugging
+    st.write("Successfully loaded API Key from secrets.")  # Debugging message
 except KeyError:
-    st.error("API Key not found in Streamlit secrets. Please check your secrets configuration.")
+    st.error("API Key not found in Streamlit secrets. Please check your secrets.toml file.")
 
 # Load or create FAISS index
 INDEX_FOLDER = "faiss_index"
@@ -24,6 +20,7 @@ support_file = "support_chats.txt"
 
 embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 
+# If vectorstore exists, load it. Otherwise, create from support_chats.txt.
 if os.path.exists(INDEX_FOLDER):
     print("Loading existing FAISS vectorstore...")
     vectorstore = FAISS.load_local(INDEX_FOLDER, embeddings, allow_dangerous_deserialization=True)
