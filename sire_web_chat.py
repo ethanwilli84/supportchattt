@@ -7,6 +7,9 @@ from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 
+# Streamlit Page Configuration (This must be the first Streamlit command)
+st.set_page_config(page_title="Sire Support Chat", layout="centered")
+
 # Access OpenAI API Key from Streamlit secrets
 try:
     OPENAI_API_KEY = st.secrets["openai_api_key"]["api_key"]
@@ -58,7 +61,6 @@ qa_chain = RetrievalQA.from_chain_type(
 )
 
 # Streamlit UI
-st.set_page_config(page_title="Sire Support Chat", layout="centered")
 st.markdown("<h1 style='text-align: center;'>💬 Sire Support Chat</h1>", unsafe_allow_html=True)
 
 if "chat_history" not in st.session_state:
