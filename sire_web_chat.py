@@ -7,16 +7,17 @@ from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 
+# Debugging: check the structure of st.secrets
+st.write("Streamlit Secrets: ", st.secrets)
+
 # Access OpenAI API Key from Streamlit secrets
 try:
+    # If the structure is correct, this should work
     OPENAI_API_KEY = st.secrets["openai_api_key"]["api_key"]
     st.write("Successfully loaded API Key from secrets.")  # Debugging line (remove after success)
-except KeyError:
-    st.error("API Key not found in Streamlit secrets. Please check your secrets.toml.")
+except KeyError as e:
+    st.error(f"API Key not found in Streamlit secrets. Please check your secrets.toml. Error: {e}")
     raise ValueError("API Key not found in Streamlit secrets.")
-
-# Check if secrets are loaded correctly (for debugging)
-st.write("Loaded secrets: ", st.secrets)
 
 # Load or create FAISS index
 INDEX_FOLDER = "faiss_index"
@@ -85,4 +86,3 @@ if st.button("Send"):
         response = qa_chain.run(user_input)
         st.session_state.chat_history.append({"user": user_input, "bot": response})
         st.rerun()
-
